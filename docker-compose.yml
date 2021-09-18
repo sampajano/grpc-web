@@ -114,3 +114,8 @@ services:
     depends_on:
       - prereqs
     image: grpcweb/protoc-plugin
+  jsunit-test:
+    build:
+      context: ./
+      dockerfile: ./packages/grpc-web/docker/jsunit-test/Dockerfile
+    image: grpcweb/jsunit-test

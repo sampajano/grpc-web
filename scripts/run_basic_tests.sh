@@ -22,14 +22,26 @@ cd "${REPO_DIR}"
 
 
 # These programs need to be already installed
-progs=(docker docker-compose npm curl)
+progs=(docker docker-compose curl)
 for p in "${progs[@]}"
 do
   command -v "$p" > /dev/null 2>&1 || \
     { echo >&2 "$p is required but not installed. Aborting."; exit 1; }
 done
 
+# Run jsunit tests
+docker-compose build jsunit-test
+docker run --rm grpcweb/jsunit-test /bin/bash \
+    /grpc-web/scripts/docker-run-jsunit-tests.sh
 
+# TODO.........................xXx.................................
+#exit 0
+# TODO.........................xXx.................................
+
+
+########################################################
+# Test Docker builds
+########################################################
 # Build all relevant docker images. They should all build successfully.
 if [[ "$MASTER" == "1" ]]; then
   # Build all for continuous_integration
@@ -41,6 +53,9 @@ else
 fi
 
 
+########################################################
+# Test echo server
+########################################################
 # Bring up the Echo server and the Envoy proxy (in background).
 # The 'sleep' seems necessary for the docker containers to be fully up
 # and listening before we test the with curl requests
@@ -53,6 +68,9 @@ source ./scripts/test-proxy.sh
 docker-compose down
 
 
+########################################################
+# Run unit tests
+########################################################
 # Run unit tests from npm package
 docker run --rm grpcweb/prereqs /bin/bash \
   /github/grpc-web/scripts/docker-run-tests.sh

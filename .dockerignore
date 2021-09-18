@@ -1,0 +1,4 @@
+**/node_modules
+# TODO: xXx eventually exclude the entire generated folder
+# packages/grpc-web/generated
+packages/grpc-web/generated/deps.js

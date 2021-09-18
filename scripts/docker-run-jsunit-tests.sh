@@ -15,15 +15,9 @@
 set -ex
 
 # This script is intended to be run within the base image from
-# net/grpc/gateway/docker/prereqs/Dockerfile
+# packages/grpc-web/docker/jsunit-test/Dockerfile
 
-# Ensures all examples targets builds
-cd /github/grpc-web && \
-  bazel clean && \
-  bazel build //net/grpc/gateway/examples/...
+cd /grpc-web/packages/grpc-web
 
-
-# TODO: xXx try to combine into run-js-tests!!!
-cd github/grpc-web/packages/grpc-web
 npm run prepare && \
-  npm run test-mocha
+  npm run test-jsunit
