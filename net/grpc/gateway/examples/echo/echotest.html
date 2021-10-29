@@ -25,13 +25,13 @@ const module = {};
 <script src="./echo_js_bin_dev.js"></script>
 <script src="./echoapp.js"></script>
 <script type="text/javascript">
- var EchoServiceClient = proto.grpc.gateway.testing.EchoServiceClient;
+ var EchoServiceClient = module.EchoServiceClient;
  var echoService = new EchoServiceClient('http://localhost:8080', null, null);
  var echoApp = new echoapp.EchoApp(
    echoService,
    {
-     EchoRequest: proto.grpc.gateway.testing.EchoRequest,
-     ServerStreamingEchoRequest: proto.grpc.gateway.testing.ServerStreamingEchoRequest
+     EchoRequest: module.EchoRequest,
+     ServerStreamingEchoRequest: module.ServerStreamingEchoRequest
    }
  );
  echoApp.load();

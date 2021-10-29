@@ -36,9 +36,10 @@ const closureArgs = [].concat(
     `--entry_point=grpc.web.Exports`,
     `--externs=externs.js`,
     `--dependency_mode=PRUNE`,
+    // `--compilation_level=SIMPLE_OPTIMIZATIONS`,
     `--compilation_level=ADVANCED_OPTIMIZATIONS`,
-    `--generate_exports`,
     `--export_local_property_definitions`,
+    `--generate_exports`,
     `--js_output_file=${indexPath}`,
   ]
 );

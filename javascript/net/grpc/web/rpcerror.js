@@ -44,6 +44,8 @@ class RpcError extends Error {
     this.code = code;
     /** @type {!Metadata} */
     this.metadata = metadata;
+    /** @type {string} */
+    this.haaaaaaaaaaaaaaaaaaaaaaaaaa = '123';
   }
 }
 

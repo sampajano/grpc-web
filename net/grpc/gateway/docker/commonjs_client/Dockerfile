@@ -24,9 +24,11 @@ WORKDIR /github/grpc-web/net/grpc/gateway/examples/echo/commonjs-example
 
 RUN npm install && \
   npm link grpc-web && \
-  npx webpack && \
+  npx webpack -d && \
   cp echotest.html /var/www/html && \
   cp dist/main.js /var/www/html/dist
+
+# npx webpack -d --mode development && \
 
 WORKDIR /var/www/html
 

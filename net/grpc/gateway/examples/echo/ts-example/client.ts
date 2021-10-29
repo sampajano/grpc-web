@@ -55,6 +55,7 @@ class EchoApp {
     request.setMessage(msg);
     const call = this.echoService.echo(
         request, {'custom-header-1': 'value1'},
+        //request, {'custom-header-2': 'value1', deadline: String(Date.now() + 50)},
         (err: grpcWeb.RpcError, response: EchoResponse) => {
           if (err) {
             if (err.code !== grpcWeb.StatusCode.OK) {
@@ -68,6 +69,7 @@ class EchoApp {
           }
         });
     call.on('status', (status: grpcWeb.Status) => {
+      console.log('Received status!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
       if (status.metadata) {
         console.log('Received metadata');
         console.log(status.metadata);

@@ -330,7 +330,9 @@ class GrpcWebClientBase {
         // grpc-timeout for this to allow the server to terminate the connection
         // with DEADLINE_EXCEEDED rather than terminating it in the Browser, but
         // at least 1 second in case the user is on a high-latency network.
-        xhr.setTimeoutInterval(Math.max(1000, Math.ceil(timeout * 1.1)));
+        console.log('xXx hahahaha');
+        xhr.setTimeoutInterval(Math.ceil(timeout * 1.1));
+        //xhr.setTimeoutInterval(Math.max(1000, Math.ceil(timeout * 1.1)));
       }
     }
   }

@@ -28,15 +28,17 @@ all: client
 client: proto-js compiled-js
 
 compiled-js:
-	./node_modules/.bin/google-closure-compiler \
+	npx google-closure-compiler \
   --js=*.js \
   --js=$(OUT_DIR)/*.js \
   --js=$(ROOT_DIR)/javascript \
   --js=$(ROOT_DIR)/$(PROTOBUF_PATH)/js \
   --js='!$(ROOT_DIR)/$(PROTOBUF_PATH)/js/**/*_test.js' \
   --js=$(NPM_DIR)/google-closure-library \
-  --entry_point=goog:proto.grpc.gateway.testing.EchoServiceClient \
+	--entry_point=haha \
   --dependency_mode=PRUNE \
+  --externs=externs/externs.js \
+  --compilation_level ADVANCED \
   --js_output_file compiled.js
 
 proto-js:

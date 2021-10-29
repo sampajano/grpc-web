@@ -1,4 +1,8 @@
 module.exports = {
-  mode: "production",
+  //mode: "production",
+  mode: "development",
   entry: "./client.js",
+  //optimization: {
+    //minimize: false
+  //},
 };

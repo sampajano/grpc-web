@@ -62,8 +62,11 @@ echoapp.EchoApp.prototype.echo = function(msg) {
   echoapp.EchoApp.addLeftMessage(msg);
   var unaryRequest = new this.ctors.EchoRequest();
   unaryRequest.setMessage(msg);
+  debugger;
   var call = this.echoService.echo(unaryRequest,
-                                   {"custom-header-1": "value1"},
+                                   {"custom-header-1": "value1",
+                                     //},
+                                     deadline: Date.now() + 50},
                                    function(err, response) {
     if (err) {
       echoapp.EchoApp.addRightMessage('Error code: '+err.code+' "'+

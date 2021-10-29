@@ -58,6 +58,10 @@ var opts = {'streamInterceptors' : [new StreamResponseInterceptor()]};
 var echoService = new EchoServiceClient('http://'+window.location.hostname+':8080', null,
                                         null);
 //                                      opts);
+ const enableDevTools = window.__GRPCWEB_DEVTOOLS__ || (() => {});
+ enableDevTools([
+   echoService,
+ ]);
 
 var echoApp = new EchoApp(
   echoService,
