@@ -11,6 +11,9 @@ const StatusCode = goog.require('grpc.web.StatusCode');
 const MethodDescriptor = goog.require('grpc.web.MethodDescriptor');
 const MethodType = goog.require('grpc.web.MethodType');
 
+// DO NOT SUBMIT - Hack to fix `goog.global.setTimeout` not found bug.
+goog.Timer.defaultTimerObject = self;
+
 module['exports']['GrpcWebClientBase'] = GrpcWebClientBase;
 module['exports']['StatusCode'] = StatusCode;
 module['exports']['MethodDescriptor'] = MethodDescriptor;
