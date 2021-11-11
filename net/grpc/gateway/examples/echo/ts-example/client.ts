@@ -54,7 +54,8 @@ class EchoApp {
     const request = new EchoRequest();
     request.setMessage(msg);
     const call = this.echoService.echo(
-        request, {'custom-header-1': 'value1'},
+        //request, {'custom-header-1': 'value1'},
+        request, {'custom-header-2': 'value1', deadline: String(Date.now() + 50)},
         (err: grpcWeb.RpcError, response: EchoResponse) => {
           if (err) {
             if (err.code !== grpcWeb.StatusCode.OK) {

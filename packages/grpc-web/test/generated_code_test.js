@@ -481,6 +481,7 @@ describe('grpc-web generated code (closure+grpcwebtext)', function() {
       `--entry_point=goog:proto.grpc.gateway.testing.EchoAppClient`,
       `--dependency_mode=PRUNE`,
       `--js_output_file ./test/generated/compiled.js`,
+      `--language_out=ECMASCRIPT_2017`,
       `--output_wrapper="%output%module.exports = `+
       `proto.grpc.gateway.testing;"`,
     ]

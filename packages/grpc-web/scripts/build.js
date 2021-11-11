@@ -37,8 +37,7 @@ const closureArgs = [].concat(
     `--externs=externs.js`,
     `--dependency_mode=PRUNE`,
     `--compilation_level=ADVANCED_OPTIMIZATIONS`,
-    `--generate_exports`,
-    `--export_local_property_definitions`,
+    `--language_out=ECMASCRIPT_2017`,
     `--js_output_file=${indexPath}`,
   ]
 );
