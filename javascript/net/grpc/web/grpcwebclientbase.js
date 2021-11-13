@@ -32,6 +32,7 @@ const AbstractClientBase = goog.require('grpc.web.AbstractClientBase');
 const ClientOptions = goog.requireType('grpc.web.ClientOptions');
 const ClientReadableStream = goog.require('grpc.web.ClientReadableStream');
 const ClientUnaryCallImpl = goog.require('grpc.web.ClientUnaryCallImpl');
+const FetchXmlHttpFactory = goog.require('goog.net.FetchXmlHttpFactory');
 const GrpcWebClientReadableStream = goog.require('grpc.web.GrpcWebClientReadableStream');
 const HttpCors = goog.require('goog.net.rpc.HttpCors');
 const MethodDescriptor = goog.requireType('grpc.web.MethodDescriptor');
@@ -54,9 +55,8 @@ const {toObject} = goog.require('goog.collections.maps');
 class GrpcWebClientBase {
   /**
    * @param {!ClientOptions=} options
-   * @param {!XhrIo=} xhrIo
    */
-  constructor(options = {}, xhrIo = undefined) {
+  constructor(options = {}) {
     /**
      * @const
      * @private {string}
@@ -92,8 +92,17 @@ class GrpcWebClientBase {
     this.unaryInterceptors_ = options.unaryInterceptors ||
         goog.getObjectByName('unaryInterceptors', options) || [];
 
-    /** @const @private {?XhrIo} */
-    this.xhrIo_ = xhrIo || null;
+    /**
+     * @const {!WorkerGlobalScope|undefined}
+     * @private
+     */
+    this.workerScope_ = options.workerScope;
+
+    /**
+     * @const
+     * @private {boolean}
+     */
+    this.chunkedServerStreaming_ = options.useFetchDownloadStreams || false;
   }
 
   /**
@@ -167,10 +176,29 @@ class GrpcWebClientBase {
   serverStreaming(method, requestMessage, metadata, methodDescriptor) {
     const hostname = AbstractClientBase.getHostname(method, methodDescriptor);
     const invoker = GrpcWebClientBase.runInterceptors_(
-        (request) => this.startStream_(request, hostname),
+        (request) =>
+            this.startStream_(request, hostname, /* isServerStreaming= */ true),
         this.streamInterceptors_);
     return /** @type {!ClientReadableStream<?>} */ (invoker.call(
         this, methodDescriptor.createRequest(requestMessage, metadata)));
+  }
+
+  /**
+   * Creates a new XhrIo object.
+   *
+   * @param {boolean} isServerStreaming
+   * @return {!XhrIo} The created XhrIo object
+   */
+  newXhr(isServerStreaming) {
+    const useBinaryChunks = this.chunkedServerStreaming_ && isServerStreaming;
+    if (this.workerScope_ || useBinaryChunks) {
+      const xmlHttpFactory = new FetchXmlHttpFactory({
+        worker: this.workerScope_,
+        streamBinaryChunks: useBinaryChunks,
+      });
+      return new XhrIo(xmlHttpFactory);
+    }
+    return new XhrIo();
   }
 
   /**
@@ -178,13 +206,14 @@ class GrpcWebClientBase {
    * @template REQUEST, RESPONSE
    * @param {!Request<REQUEST, RESPONSE>} request
    * @param {string} hostname
+   * @param {boolean=} isServerStreaming
    * @return {!ClientReadableStream<RESPONSE>}
    */
-  startStream_(request, hostname) {
+  startStream_(request, hostname, isServerStreaming = false) {
     const methodDescriptor = request.getMethodDescriptor();
     let path = hostname + methodDescriptor.getName();
 
-    const xhr = this.xhrIo_ ? this.xhrIo_ : new XhrIo();
+    const xhr = this.newXhr(isServerStreaming);
     xhr.setWithCredentials(this.withCredentials_);
 
     const genericTransportInterface = {

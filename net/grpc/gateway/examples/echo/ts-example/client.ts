@@ -29,8 +29,8 @@ import {EchoServiceClient} from './echo_grpc_web_pb';
 import {EchoRequest, EchoResponse, ServerStreamingEchoRequest, ServerStreamingEchoResponse} from './echo_pb';
 
 class EchoApp {
-  static readonly INTERVAL = 500;  // ms
-  static readonly MAX_STREAM_MESSAGES = 50;
+  static readonly INTERVAL = 1;  // ms
+  static readonly MAX_STREAM_MESSAGES = 9999999999999999;
 
   stream?: grpcWeb.ClientReadableStream<ServerStreamingEchoResponse>;
 
@@ -164,7 +164,8 @@ class EchoApp {
   }
 }
 
-const echoService = new EchoServiceClient('http://localhost:8080', null, null);
+//const echoService = new EchoServiceClient('http://localhost:8080', null, null);
+const echoService = new EchoServiceClient('http://localhost:8080', null, {useFetchDownloadStreams: true});
 
 const echoApp = new EchoApp(echoService);
 echoApp.load();
