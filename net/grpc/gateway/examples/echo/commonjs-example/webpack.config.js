@@ -1,4 +1,5 @@
 module.exports = {
-  mode: "production",
+  mode: "development",
+  //mode: "production",
   entry: "./client.js",
 };
