@@ -21,12 +21,32 @@ import * as $ from 'jquery';
 
 // Uncomment either one of the following:
 // Option 1: import_style=commonjs+dts
-import {EchoServiceClient} from './echo_grpc_web_pb';
+import {EchoServiceClient, EchoServicePromiseClient} from './echo_grpc_web_pb';
 
 // Option 2: import_style=typescript
 // import {EchoServiceClient} from './EchoServiceClientPb';
 
 import {EchoRequest, EchoResponse, ServerStreamingEchoRequest, ServerStreamingEchoResponse} from './echo_pb';
+
+class MyUnaryInterceptor implements grpcWeb.UnaryInterceptor<
+  EchoRequest, EchoResponse> {
+  intercept(request: grpcWeb.Request<EchoRequest, EchoResponse>,
+    invoker: (request: grpcWeb.Request<EchoRequest, EchoResponse>) =>
+      Promise<grpcWeb.UnaryResponse<EchoRequest, EchoResponse>>) {
+    const reqMsg = request.getRequestMessage();
+    reqMsg.setMessage('[Intercept request]' + reqMsg.getMessage());
+
+    return invoker(request).then(response => {
+      const responseMsg = response.getResponseMessage();
+      responseMsg.setMessage('[Intercept response]' + responseMsg.getMessage());
+      return response;
+    }).catch(err => {
+      debugger;
+      console.log('xXx error!! :)', err.code, err.message);
+      throw err;
+    });
+  }
+}
 
 class EchoApp {
   static readonly INTERVAL = 500;  // ms
@@ -34,7 +54,9 @@ class EchoApp {
 
   stream?: grpcWeb.ClientReadableStream<ServerStreamingEchoResponse>;
 
-  constructor(public echoService: EchoServiceClient) {}
+  constructor(public echoService: EchoServiceClient,
+    public echoPromiseService: EchoServicePromiseClient
+  ) { }
 
   static addMessage(message: string, cssClass: string) {
     $('#first').after($('<div/>').addClass('row').append($('<h2/>').append(
@@ -75,6 +97,27 @@ class EchoApp {
     });
   }
 
+  echoPromise(msg: string) {
+    EchoApp.addLeftMessage(msg);
+    const request = new EchoRequest();
+    request.setMessage(msg);
+
+    const call = this.echoPromiseService.echo(
+      request, { 'custom-header-1': 'value1' })
+      .then((response: EchoResponse) => {
+        setTimeout(() => {
+          EchoApp.addRightMessage(response.getMessage());
+        }, EchoApp.INTERVAL);
+      })
+      .catch((err: grpcWeb.RpcError) => {
+        if (err && err.code !== grpcWeb.StatusCode.OK) {
+          EchoApp.addRightMessage(
+            'Error code: ' + err.code + ' "' + decodeURI(err.message) +
+            '"');
+        }
+      });
+  }
+
   echoError(msg: string) {
     EchoApp.addLeftMessage(`Error: ${msg}`);
     const request = new EchoRequest();
@@ -87,6 +130,14 @@ class EchoApp {
                 '"');
           }
         });
+
+    this.echoPromiseService.echoAbort(request, {}).catch((err: grpcWeb.RpcError) => {
+      if (err && err.code !== grpcWeb.StatusCode.OK) {
+        EchoApp.addRightMessage(
+          'Error code: ' + err.code + ' "' + decodeURI(err.message) +
+          '"');
+      }
+    });
   }
 
   cancel() {
@@ -145,7 +196,8 @@ class EchoApp {
     } else if (msg === 'cancel') {
       this.cancel();
     } else {
-      this.echo(msg);
+      // this.echo(msg);
+      this.echoPromise(msg);
     }
   }
 
@@ -164,7 +216,9 @@ class EchoApp {
   }
 }
 
-const echoService = new EchoServiceClient('http://localhost:8080', null, null);
+var opts = {'unaryInterceptors' : [new MyUnaryInterceptor()]};
+const echoService = new EchoServiceClient('http://localhost:8080', null, opts);
+const echoPromiseService = new EchoServicePromiseClient('http://localhost:8080', null, opts);
 
-const echoApp = new EchoApp(echoService);
+const echoApp = new EchoApp(echoService, echoPromiseService);
 echoApp.load();
